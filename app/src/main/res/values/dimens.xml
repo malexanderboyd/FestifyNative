@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="material_design_title_size">56sp</dimen>
+</resources>

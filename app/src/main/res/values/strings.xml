@@ -1,0 +1,8 @@
+<resources>
+    <string name="spotify_client_key">67161e71e8d0431587a007c7d95427c2</string>
+    <string name="spotify_callback_uri">com.opensource.boyd.festifynative://callback</string>
+    <string name="app_name">FestifyNative</string>
+    <string name="action_settings">Settings</string>
+    <string name="login_title_label">Festify</string>
+    <string name="login_instructions">Festify requires a Spotify premium account!\n\nPlease login below to start using Festify.</string>
+</resources>
