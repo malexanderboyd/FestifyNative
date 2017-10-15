@@ -1,6 +1,21 @@
 <resources>
+    <!-- Spotify -->
     <string name="spotify_client_key">67161e71e8d0431587a007c7d95427c2</string>
     <string name="spotify_callback_uri">com.opensource.boyd.festifynative://callback</string>
+
+    <!-- Festify -->
+    <string name="festify_api_base_url">https://festify-162216.appspot.com/</string>
+
+    <!-- Provider -->
+    <string name="photo_provider">com.opensource.boyd.festifynative.fileprovider</string>
+
+
+
+
+
+
+
+    <!-- UI -->
     <string name="app_name">FestifyNative</string>
     <string name="action_settings">Settings</string>
     <string name="login_title_label">Festify</string>

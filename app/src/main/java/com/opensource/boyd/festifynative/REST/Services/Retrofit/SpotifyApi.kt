@@ -14,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class SpotifyApi private constructor() {
 
     private val spotify : SpotifyService
-
+    private lateinit var authToken: String
 
     private object Holder { val INSTANCE = SpotifyApi() }
 
@@ -32,7 +32,8 @@ class SpotifyApi private constructor() {
     }
 
     fun getUser(authToken : String) : Flowable<User.SpotifyInfo> {
-        return spotify.getUser("Authorization: Bearer " + authToken)
+        this.authToken = "Authorization: Bearer " + authToken
+        return spotify.getUser(this.authToken)
     }
 
 }

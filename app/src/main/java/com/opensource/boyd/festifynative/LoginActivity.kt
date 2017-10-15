@@ -7,13 +7,23 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import com.facebook.stetho.Stetho
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException
+import com.opensource.boyd.festifynative.Model.User
+import com.opensource.boyd.festifynative.REST.Services.Retrofit.FestifyApi
 import com.opensource.boyd.festifynative.ViewModel.LoginActivityViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
 import kotlinx.android.synthetic.main.activity_login.*
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity(), LoginActivityViewModel.RetryAuthListener {
+    override fun handleExpiredAuth() {
+        startNewUser()
+    }
 
     lateinit private var viewModel : LoginActivityViewModel
     private val SPOTIFY_ACCESS_TOKEN_PREF: String
@@ -21,6 +31,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Stetho.initializeWithDefaults(this)
         setContentView(R.layout.activity_login)
         setSupportActionBar(toolbar)
 
@@ -29,34 +40,57 @@ class LoginActivity : AppCompatActivity() {
 
         toggleLoginComponents()
 
-        getUser()
+        checkExistingUser()
+
+        fab.setOnClickListener { view ->
+            startNewUser()
+        }
 
     }
 
-    fun getSavedUser(accessToken : String) {
+    private fun getSavedUser(accessToken : String) {
         viewModel.getUser(accessToken).observe(this, Observer {
             it?.let {
-                fragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, InstructionsFragment.newInstance(it))
-                        .commit()
+                if(it.isTokenExpired) {
+                    toggleLoginComponents()
+                } else {
+                    it.spotifyData?.let {
+                        startCameraActivity()
+                    }
+                }
             }
         })
     }
 
-    fun StartNewUser() {
+    private fun startNewUser() {
         val sharedPref : SharedPreferences = getPreferences(Context.MODE_PRIVATE)
         viewModel.spotifyLogin(this).observe(this, Observer {
             it?.let {
                 toggleLoginComponents()
-                sharedPref.edit().putString(SPOTIFY_ACCESS_TOKEN_PREF, viewModel.userTkn.authToken).apply()
-                fragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, InstructionsFragment.newInstance(it))
-                        .commit()
+                sharedPref.edit().putString(SPOTIFY_ACCESS_TOKEN_PREF, viewModel.user.authToken).apply()
+                startCameraActivity()
             }
         })
     }
 
-    fun getUser() {
+
+    private fun startCameraActivity() {
+        viewModel.festifyAuthorization()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    val cameraActivityIntent = Intent(this, PhotoActivity::class.java)
+                    cameraActivityIntent.putExtra("current-user", viewModel.user)
+                    startActivity(cameraActivityIntent)
+                }, {
+                    val exception = it as? HttpException
+                    exception?.let {
+                        Log.e("FestifyAuth: ", exception.localizedMessage)
+                    }
+                })
+    }
+
+    private fun checkExistingUser() {
         val sharedPref : SharedPreferences = getPreferences(Context.MODE_PRIVATE)
         if(sharedPref.contains(SPOTIFY_ACCESS_TOKEN_PREF)) {
             val accessToken = sharedPref.getString(SPOTIFY_ACCESS_TOKEN_PREF, "")
@@ -65,12 +99,9 @@ class LoginActivity : AppCompatActivity() {
             }
         } else {
             toggleLoginComponents()
-            fab.setOnClickListener { view ->
-                StartNewUser()
-            }
         }
     }
-    fun toggleLoginComponents() {
+    private fun toggleLoginComponents() {
         loginInstructions.visibility = if(loginInstructions.visibility == View.VISIBLE) View.INVISIBLE else View.VISIBLE
         fab.visibility = if(fab.visibility == View.VISIBLE) View.INVISIBLE else View.VISIBLE
         titleLabel.visibility = if(titleLabel.visibility == View.VISIBLE) View.INVISIBLE else View.VISIBLE

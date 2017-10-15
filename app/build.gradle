@@ -10,7 +10,7 @@ android {
         }
     }
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.opensource.boyd.festifynative"
         minSdkVersion 21
@@ -41,6 +41,8 @@ dependencies {
     implementation 'com.android.support:design:26.1.0'
     implementation "android.arch.lifecycle:runtime:1.0.0"
     implementation "android.arch.lifecycle:extensions:1.0.0-alpha9-1"
+    compile 'com.facebook.stetho:stetho:1.5.0'
+    compile 'com.facebook.stetho:stetho-okhttp3:1.5.0'
     compile 'com.spotify.android:auth:1.0.0-alpha'
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
